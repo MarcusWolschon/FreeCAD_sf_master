@@ -753,6 +753,14 @@ public:
 class CamExport ObjectNamesForType : public Definition
 {
 public:
+	typedef int Number_t;
+	typedef std::string Name_t;
+
+	typedef std::list< Name_t > Encode_t;
+
+	QString encode(const Encode_t data) const;
+	Encode_t decode() const;
+
 	ObjectNamesForType(	const char *name, 
 								const char *label, 
 								const char *helptext,
@@ -763,8 +771,10 @@ public:
 	void SetDelimiters(const char * object_type);
 	virtual ValidationState validate(QString & input,int & position) const;
 
+	void setByLabels(const QString verbose_list_of_labels, const QString delimiter);
 	QStringList GetTypes() const;
 	QStringList GetNames() const;
+	QStringList GetLabels() const;	// This is the App::DocumentObject::Label (which may change while the App::DocumentObject::nameInDocument does not.
 	virtual bool AddToPythonDictionary(PyObject *dictionary, const QString requested_units, const QString prefix) const;
 };
 
@@ -781,6 +791,7 @@ public:
 
 	QString GetType() const;
 	QString GetName() const;
+	QString GetLabel() const;	// This is the App::DocumentObject::Label (which may change while the App::DocumentObject::nameInDocument does not.
 	virtual bool AddToPythonDictionary(PyObject *dictionary, const QString requested_units, const QString prefix) const;
 };
 

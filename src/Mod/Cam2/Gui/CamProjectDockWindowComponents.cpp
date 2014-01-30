@@ -237,6 +237,7 @@ void CamTextBoxComponent::editingFinished() {
 		QString qvalue = widget->text();
 		Cam::Settings::Integer *pIntSetting = dynamic_cast<Cam::Settings::Integer *>(tpgsetting);
 		Cam::Settings::Double *pDoubleSetting = dynamic_cast<Cam::Settings::Double *>(tpgsetting);
+		Cam::Settings::ObjectNamesForType *pObjNamesForType = dynamic_cast<Cam::Settings::ObjectNamesForType *>(tpgsetting);
 		if (pIntSetting)
 		{
 			// Interpret the value using the Python interpreter.
@@ -273,7 +274,28 @@ void CamTextBoxComponent::editingFinished() {
 				widget->setText(tpgsetting->getValue());
 			}
 		}
-		else {
+		else if (pObjNamesForType)
+		{
+			int position = 0;
+			if (pObjNamesForType->validate(widget->text(), position) == Cam::Settings::Definition::Acceptable)
+			{
+				pObjNamesForType->setByLabels(widget->text(), QString::fromAscii(","));
+			}
+			else
+			{
+				// Reinstate the original value.
+				std::ostringstream ossLabels;
+				QStringList labels = pObjNamesForType->GetLabels();
+				for (QStringList::const_iterator itLabel = labels.begin(); itLabel != labels.end(); itLabel++)
+				{
+					if (itLabel != labels.begin()) ossLabels << ",";
+					ossLabels << itLabel->toAscii().constData();
+				}
+				widget->setText( QString::fromStdString(ossLabels.str()) );
+			}
+		}
+		else
+		{
 			if (!tpgsetting->setValue(qvalue))
 			{
 				Base::Console().Error("Saving failed: '%s'\n", tpgsetting->name.toStdString().c_str());
@@ -367,6 +389,23 @@ void CamLineEdit::refresh()
 				std::ostringstream ossValue;
 				ossValue << integer_setting->get();
 				this->setText(QString::fromStdString(ossValue.str()));
+			}
+		}
+		break;
+
+	case Cam::Settings::Definition::SettingType_ObjectNamesForType:
+		{
+			Cam::Settings::ObjectNamesForType *pObjNamesForType = dynamic_cast<Cam::Settings::ObjectNamesForType *>(this->tpgSetting);
+			if (pObjNamesForType)
+			{
+				std::ostringstream ossLabels;
+				QStringList labels = pObjNamesForType->GetLabels();
+				for (QStringList::const_iterator itLabel = labels.begin(); itLabel != labels.end(); itLabel++)
+				{
+					if (itLabel != labels.begin()) ossLabels << ",";
+					ossLabels << itLabel->toAscii().constData();
+				}
+				this->setText(QString::fromStdString(ossLabels.str()));
 			}
 		}
 		break;
@@ -500,9 +539,26 @@ bool CamTextBoxComponent::makeUI(Cam::Settings::Definition *tpgsetting, QFormLay
 
 			switch(tpgsetting->type)
 			{
+			case Cam::Settings::Definition::SettingType_ObjectNamesForType:
+				{
+					Cam::Settings::ObjectNamesForType *pObjNameForType = dynamic_cast<Cam::Settings::ObjectNamesForType *>(tpgsetting);
+					if (pObjNameForType)
+					{
+						std::ostringstream ossValue;
+						QStringList labels = pObjNameForType->GetLabels();
+						for (QStringList::const_iterator itLabel = labels.begin(); itLabel != labels.end(); itLabel++)
+						{
+							if (itLabel != labels.begin()) ossValue << ",";
+							ossValue << itLabel->toStdString().c_str();
+						}
+
+						this->widget->setText(QString::fromStdString(ossValue.str()));
+					}
+				}
+				break;
+
 			case Cam::Settings::Definition::SettingType_Double:
 			case Cam::Settings::Definition::SettingType_Text:
-			case Cam::Settings::Definition::SettingType_ObjectNamesForType:
 			case Cam::Settings::Definition::SettingType_Integer:
 			default:
 				if (tpgsetting->getValue() != QString::null)

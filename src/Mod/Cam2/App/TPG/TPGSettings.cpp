@@ -1987,19 +1987,124 @@ QStringList ObjectNamesForType::GetTypes() const
 QStringList ObjectNamesForType::GetNames() const
 {
 	QStringList names;
-	Option *delimiters_option = this->getOption(QString::fromAscii("Delimiters"));
-	if (delimiters_option != NULL)
+	Encode_t data = this->decode();
+	for (Encode_t::const_iterator itName = data.begin(); itName != data.end(); itName++)
 	{
-		// Use a regular expression so that we use any one of the characters in the delimiters string
-		// as a delimiting character.
-		QString value = this->getValue();
-		QString expression = QString::fromAscii("[") + delimiters_option->label + QString::fromAscii("]");
-		QRegExp regular_expression(expression);
-		names = value.split(regular_expression, QString::SkipEmptyParts);
+		names.append( QString::fromAscii( itName->c_str() ) );
 	}
-
+	
 	return(names);
 }
+
+QStringList ObjectNamesForType::GetLabels() const
+{
+	QStringList labels;
+
+	// The list of object 'names' is stored in the property tree.  Extract that list
+	// and convert these object names into their corresponding labels.
+
+	App::Document *document = App::GetApplication().getActiveDocument();
+	if (document)
+	{
+		Encode_t data = this->decode();
+		for (Encode_t::const_iterator itName = data.begin(); itName != data.end(); itName++)
+		{
+			App::DocumentObject *object = document->getObject(itName->c_str());
+			if(object)
+			{
+				labels.append( QString::fromAscii(object->Label.getValue()) );
+			}
+		}
+	}
+
+	return(labels);
+}
+
+QString Settings::ObjectNamesForType::encode(const Settings::ObjectNamesForType::Encode_t data) const
+{
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	pt.put("ObjectNamesForType.number", Number_t(data.size()));
+	int i=0;
+	for (Encode_t::const_iterator itData = data.begin(); itData != data.end(); itData++)
+	{
+		std::ostringstream ossKey;
+		ossKey << "name" << i++;
+	
+		pt.put(ossKey.str().c_str(), Name_t(*itData));
+	}
+	
+	std::ostringstream encoded_value;
+
+	write_json(encoded_value, pt);
+	return(QString::fromStdString(encoded_value.str()));
+}
+
+Settings::ObjectNamesForType::Encode_t Settings::ObjectNamesForType::decode() const
+{
+	std::list<QString> values;
+	values.push_back( this->getValue() );
+	values.push_back( this->defaultvalue );
+	for (std::list<QString>::const_iterator itValue = values.begin(); itValue != values.end(); itValue++)
+	{
+		if (itValue->isNull() == false)
+		{
+			try
+			{
+				using boost::property_tree::ptree;
+				ptree pt;
+
+				std::stringstream encoded_value;
+				encoded_value << itValue->toAscii().constData();
+				
+				read_json(encoded_value, pt);
+
+				Encode_t data;
+
+				Number_t number_of_names = pt.get<Number_t>("ObjectNamesForType.number");
+				for (Number_t i=0; i<number_of_names; i++)
+				{
+					std::ostringstream ossKey;
+					ossKey << "name" << i++;
+				
+					data.push_back(pt.get<Name_t>(ossKey.str().c_str()));
+				}
+
+				return(data);
+			}
+			catch(boost::property_tree::ptree_error const & error)
+			{
+				qWarning("%s\n", error.what());
+			}
+		}
+	}
+
+	Encode_t empty;
+	
+	return(empty);
+}
+
+
+void Settings::ObjectNamesForType::setByLabels(const QString verbose_list_of_labels, const QString delimiter)
+{
+	// Use a regular expression so that we use any one of the characters in the delimiters string
+	// as a delimiting character.
+	QString expression = QString::fromAscii("[") + delimiter + QString::fromAscii("]");
+	QRegExp regular_expression(expression);
+	QStringList object_labels = verbose_list_of_labels.split(regular_expression, QString::SkipEmptyParts);
+
+	Encode_t data;
+	for (QStringList::const_iterator itLabel = object_labels.begin(); itLabel != object_labels.end(); itLabel++)
+	{
+		over here
+		data.push_back( itLabel->toStdString() );
+	}
+
+	this->setValue(this->encode(data));
+}
+
+
 
 #ifdef WIN32
 #pragma endregion "Settings::ObjectNamesForType"
@@ -2084,6 +2189,22 @@ QString SingleObjectNameForType::GetType() const
 QString SingleObjectNameForType::GetName() const
 {
 	return(this->getValue());
+}
+
+QString SingleObjectNameForType::GetLabel() const
+{
+	App::Document *document = App::GetApplication().getActiveDocument();
+	if (document)
+	{
+		App::DocumentObject *object = document->getObject(this->GetName().toAscii().constData());
+		if(object)
+		{
+			return( QString::fromAscii(object->Label.getValue()) );
+		}
+		
+	}
+
+	return(QString::null);
 }
 
 #ifdef WIN32
