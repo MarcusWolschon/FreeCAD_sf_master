@@ -42,8 +42,8 @@
 
 #ifdef FC_OS_WIN32
 # include <Shlobj.h>
-// Doesn't seem to work with VS2010
-# if (defined(_MSC_VER) && (_MSC_VER < 1600))
+// Doesn't seem to work with VS2010 or VS2008
+# if (defined(_MSC_VER) && (_MSC_VER < 1500))
 # include <Shfolder.h>
 # endif
 #endif

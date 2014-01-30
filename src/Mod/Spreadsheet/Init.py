@@ -29,4 +29,3 @@ ParGrp.SetString("HelpIndex","http://www.freecadweb.org")
 # Supported file types
 FreeCAD.addImportType("Spreadsheet (*.csv)","Spreadsheet")
 FreeCAD.addExportType("Spreadsheet (*.csv)","Spreadsheet")
-

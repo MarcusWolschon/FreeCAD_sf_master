@@ -11,3 +11,11 @@ Makefile
 CMakeCache.txt
 config.h
 install_manifest.txt
+.project
+.pydevproject
+.gitattributes
+.directory
+.gitignore
+.cproject
+.settings
+Debug

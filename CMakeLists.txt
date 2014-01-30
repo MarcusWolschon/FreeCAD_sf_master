@@ -1,6 +1,6 @@
 project(FreeCAD_trunk)
 set(FREECAD_VERSION "0.13")
-
+set(CMAKE_BUILD_TYPE Debug)
 # Needed for salomesmesh
 if(CMAKE_COMPILER_IS_GNUCXX)
 ENABLE_LANGUAGE(Fortran)
@@ -246,7 +246,7 @@ else(FREECAD_LIBPACK_USE)
         "1.36.1" "1.36.0" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0" "1.34"
         "1.33.1" "1.33.0" "1.33" )
 
-    find_package(Boost COMPONENTS filesystem program_options regex signals system thread REQUIRED)
+    find_package(Boost COMPONENTS filesystem program_options python regex signals system thread REQUIRED)
 
 # -------------------------------- XercesC --------------------------------
 
