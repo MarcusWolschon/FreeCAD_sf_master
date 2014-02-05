@@ -2097,7 +2097,7 @@ void Settings::ObjectNamesForType::setByLabels(const QString verbose_list_of_lab
 	Encode_t data;
 	for (QStringList::const_iterator itLabel = object_labels.begin(); itLabel != object_labels.end(); itLabel++)
 	{
-		over here
+//		over here
 		data.push_back( itLabel->toStdString() );
 	}
 

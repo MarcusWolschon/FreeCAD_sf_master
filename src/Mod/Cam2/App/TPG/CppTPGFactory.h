@@ -33,7 +33,8 @@ namespace Cam {
 
 /**
  * A C++ TPG Factory class.  It manages the library files and the library cache.
- * This is the C++ equivalent to PyTPGFactory
+ * This is the C++ equivalent to PyTPGFactory.
+ * You should use TPGFactory to get Python and C++ TPGs.
  */
 class CppTPGFactoryInst {
 

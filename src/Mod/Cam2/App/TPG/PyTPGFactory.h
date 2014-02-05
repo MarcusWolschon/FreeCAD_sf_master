@@ -40,16 +40,26 @@ namespace Cam {
 
 /**
  * A class that manages the interface to the Python TPG implementations.
+ * This is the Python equivalent to CppTPGFactory.
+ * You should use TPGFactory to get Python and C++ TPGs.
  */
 class CamExport PyTPGFactoryInst
 {
 protected:
 	static PyTPGFactoryInst* _pcSingleton;
+	/**
+	 * Instance of PyTPGFactory from PyCam.py that this class is a
+	 * C++ frontend to.
+	 * Initialized via loadCallbackFromModule() and setCallback(obj).
+	 */
 	PyObject* obj;
 	PyTPGFactoryInst();
 	~PyTPGFactoryInst();
 
 //	std::vector<TPGDescriptor *> tpgs;
+    /**
+     * Access via getDescriptors()
+     */
     TPGDescriptorCollection* descriptors;
 
 
@@ -63,7 +73,8 @@ public:
 	static void destruct (void);
 
 	/**
-	 * Set the PyTPGFactory (python) callback object
+	 * Set the PyTPGFactory (python) callback object.
+	 * See also loadCallbackFromModule().
 	 */
 	void setCallback(PyObject* obj);
 
@@ -89,7 +100,9 @@ public:
     void scanPlugins();
 
     /**
-     * Get a vector of all Python TPG's that are known about
+     * Get a vector of all Python TPG's that are known about.
+     * Implicitly calls scanPlugins() if a scan has not been
+     * a conducted yet.
      */
 //    std::vector<TPGDescriptor*>* getDescriptors();
     TPGDescriptorCollection* getDescriptors();

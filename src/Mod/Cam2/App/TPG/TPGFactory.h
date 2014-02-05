@@ -51,8 +51,22 @@ namespace Cam
 class TPGFactoryInstP
 {
 public:
+    /**
+     * List of descriptors for all C++ and Python
+     * ToolPathGenerators.
+     * 
+     * Filled via TPGFactoryInst::scanPlugins().
+     * 
+     * Warning! Defaults to NULL. Initialized via
+     * TPGFactoryInst::clearDescriptors()
+     */
     Cam::TPGDescriptorCollection* descriptors;
 
+    /**
+     * After creation, you must call
+     * TPGFactoryInst::clearDescriptors()
+     * before using this class.
+     */
     TPGFactoryInstP() {
         descriptors = NULL;
     }
@@ -92,7 +106,9 @@ private:
   TPGFactoryInstP* d;
 };
 
-/// Get the global instance
+/**
+ * Get the global instance
+ */
 inline TPGFactoryInst& TPGFactory(void)
 {
     return TPGFactoryInst::instance();

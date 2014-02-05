@@ -53,7 +53,7 @@ PyTPGFactoryInst::PyTPGFactoryInst()
 {
     Base::Interpreter().runString("import PyTPG");
     this->obj = NULL;
-    descriptors = new TPGDescriptorCollection();
+    descriptors = NULL;
 }
 
 /**
@@ -154,7 +154,9 @@ void PyTPGFactoryInst::scanPlugins() {
             if (PyList_Check(result)) {
 
                 // clean the current list
-                descriptors->release();
+                if (descriptors != NULL) {
+		   descriptors->release();
+		}
                 descriptors = new TPGDescriptorCollection();
 
                 // add the new items
@@ -183,7 +185,7 @@ void PyTPGFactoryInst::scanPlugins() {
 TPGDescriptorCollection* PyTPGFactoryInst::getDescriptors()
 {
     // cache a copy of the descriptors
-    if (descriptors->size() == 0)
+    if (descriptors == NULL)
         this->scanPlugins();
 
     printf("Found %i PyTPGs\n", descriptors->size());
